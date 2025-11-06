@@ -1,4 +1,3 @@
-
 (function () {
     'use strict';
 
@@ -235,6 +234,7 @@
                 player = new VideoPlayer(config);
                 player.open(config.url);
                 registerMouseEvents();
+                tracker = new AVPlayTracker(avplay, config.options);
             },
             function(error) {
                 log("An error occurred " + error.message);

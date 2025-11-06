@@ -43,11 +43,8 @@ function VideoPlayer(config) {
      * @type {Boolean}
      */
     var isUhd = false;
-    var tracker = new nrvideo.VideoTracker(config.player, config.options)
-    nrvideo.Core.addTracker(tracker, config.options)
     return {
-    	tizenTracker: tracker,
-        /**
+    	/**
          * Function to initialize the playback.
          * @param {String} url - content url, if there is no value then take url from config
          */
@@ -67,7 +64,7 @@ function VideoPlayer(config) {
 //                    log("Current playtime: " + currentTime);
                 },
                 onevent: function (eventType, eventData) {
-//                    log("event type: " + eventType + ", data: " + eventData);
+                    log("event type: " + eventType + ", data: " + eventData);
                 },
                 onstreamcompleted: function () {
                     log("Stream Completed");
@@ -91,7 +88,6 @@ function VideoPlayer(config) {
                     playerCoords.height
                 );
                 webapis.avplay.setListener(listener);
-                this.tizenTracker.sendRequest();
             } catch (e) {
                 log(e);
             }
@@ -104,17 +100,13 @@ function VideoPlayer(config) {
             }           
             
             if (webapis.avplay.getState() === 'IDLE') {
-            	this.tizenTracker.sendRequest();
             	webapis.avplay.prepare();
                 webapis.avplay.play();
                 console.log('onplay');
-                console.log('onplay state idle: ' + this.tizenTracker.state)
+                console.log('onplay state idle: ');
             } else if(webapis.avplay.getState() === 'PAUSED'){
-            	this.tizenTracker.sendBufferEnd();
-            	this.tizenTracker.sendResume();
-            	this.tizenTracker.sendStart();
             	webapis.avplay.play();
-            	console.log('onplay state paused: ' + this.tizenTracker.state)
+            	console.log('onplay state paused');
             	console.log('onpause');
             }
         },
@@ -123,8 +115,7 @@ function VideoPlayer(config) {
          * Function to stop current playback.
          */
         stop: function () {
-        	this.tizenTracker.sendEnd();
-            webapis.avplay.stop();
+        	webapis.avplay.stop();
             //switch back from fullscreen to window if stream finished playing
             if (isFullscreen === true) {
                 this.toggleFullscreen();
@@ -141,7 +132,6 @@ function VideoPlayer(config) {
                 url = config.url;
             }
             console.log('pause');
-            this.tizenTracker.sendPause();
             webapis.avplay.pause();
             console.log('onpause end');
         },
@@ -149,15 +139,13 @@ function VideoPlayer(config) {
          * Jump forward 3 seconds (3000 ms).
          */
         ff: function () {
-        	this.tizenTracker.sendSeeking();
-            webapis.avplay.jumpForward('3000');
+        	webapis.avplay.jumpForward('3000');
         },
         /**
          * Rewind 3 seconds (3000 ms).
          */
         rew: function () {
-        	this.tizenTracker.sendSeeking();
-            webapis.avplay.jumpBackward('3000');
+        	webapis.avplay.jumpBackward('3000');
         },
         /**
          * Set flag to play UHD content.

@@ -4,13 +4,8 @@ import { version } from '../package.json';
 export default class AVPlayTracker extends nrvideo.VideoTracker {
   constructor(player, options) {
     super(player, options);
-    nrvideo.Core.addTracker(this);
+    nrvideo.Core.addTracker(this, options);
 
-    if (this.versionString) {
-      this.majorVersion = parseInt(this.versionString.split('.')[0]);
-    } else {
-      console.error('player.getVersion is not supported by avplay js');
-    }
     this.options = options;
     
     // State monitoring variables
@@ -89,39 +84,47 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
   }
 
   onBufferingStart() {
-    this.sendDownload({ state: 'buffering started' });
+    console.log('onBufferingStart');
+    this.sendDownload();
   }
 
   onBufferingProgress(percent) {
     console.log('onBufferingProgress', percent);
-    this.sendDownload({ state: 'buffering', percent });
+    // this.sendDownload({ state: 'progress' });
   }
 
   onBufferingComplete() {
-    this.sendDownload({ state: 'buffering complete' });
+    console.log('onBufferingComplete');
+    // this.sendDownload({ state: 'loadeddata' });
   }
 
   onStreamCompleted() {
+    console.log('onStreamCompleted');
     this.sendEnd();
   }
 
   onCurrentPlaytime(currentTime) {
+    console.log('onCurrentPlaytime', currentTime);
     // this.sendDownload({ state: 'playing', currentTime });
   }
 
   onEvent(eventType, eventData) {
+    console.log('onEvent', eventType, eventData);
     // this.sendDownload({ state: 'event', eventType, eventData });
   }
 
   onError(eventType) {
+    console.log('onError', eventType);
     this.sendError({ error: eventType });
   }
 
   onErrorMsg(eventType, errorMessage) {
+    console.log('onErrorMsg', eventType, errorMessage);
     this.sendError({ error: eventType, errorMessage });
   }
 
   onDrmEvent(type, data) {
+    console.log('onDrmEvent', type, data);
     // this.sendDownload({ state: 'drm event', type, data });
   }
 
@@ -158,11 +161,15 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
    */
   handleStateChange(previousState, currentState) {
     // Handle state transitions
+    console.log(`handleStateChange ${previousState} -> ${currentState}`);
     switch (currentState) {
       case 'IDLE':
         // Player is idle, ready to prepare
         if (previousState && previousState !== 'IDLE' && previousState !== 'NONE') {
           // Player was in a different state and moved to idle
+          this.sendEnd();
+        }
+        if (previousState === 'PLAYING') {
           this.sendEnd();
         }
         break;
@@ -176,19 +183,21 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
         break;
 
       case 'PLAYING':
+        if (previousState === 'IDLE' || previousState === null) {
+          // Transitioned from idle to ready
+          this.sendRequest();
+        }
         // Player started playing
         if (previousState === 'PAUSED') {
           // Resuming from pause
           this.sendResume();
           this.sendBufferEnd();
-          this.sendStart();
         } else if (previousState === 'BUFFERING') {
           // Buffering complete, resuming playback
           this.sendBufferEnd();
-          this.sendStart();
         } else if (previousState === 'READY' || previousState === null) {
           // Starting from ready or initial state
-          this.sendStart();
+          this.sendRequest();
         } else if (previousState !== 'PLAYING') {
           // Started playing from any other state
           this.sendStart();
@@ -198,6 +207,8 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
       case 'PAUSED':
         // Player is paused
         if (previousState === 'PLAYING') {
+          
+          console.log(`sendPause ${this.state.goPause()}`);
           this.sendPause();
         }
         break;
