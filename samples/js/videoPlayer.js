@@ -88,6 +88,7 @@ function VideoPlayer(config) {
                     playerCoords.height
                 );
                 webapis.avplay.setListener(listener);
+                webapis.avplay.prepareAsync();
             } catch (e) {
                 log(e);
             }
@@ -97,17 +98,11 @@ function VideoPlayer(config) {
             //set 4k
             if (isUhd) {
                 this.set4K();
-            }           
-            
-            if (webapis.avplay.getState() === 'IDLE') {
-            	webapis.avplay.prepare();
+            }
+            if (webapis.avplay.getState() === 'IDLE' || webapis.avplay.getState() === 'READY') {
                 webapis.avplay.play();
-                console.log('onplay');
-                console.log('onplay state idle: ');
             } else if(webapis.avplay.getState() === 'PAUSED'){
             	webapis.avplay.play();
-            	console.log('onplay state paused');
-            	console.log('onpause');
             }
         },
        
