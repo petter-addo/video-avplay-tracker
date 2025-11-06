@@ -134,13 +134,13 @@ function VideoPlayer(config) {
          * Jump forward 3 seconds (3000 ms).
          */
         ff: function () {
-        	webapis.avplay.jumpForward('3000');
+        	webapis.avplay.jumpForward(3000);
         },
         /**
          * Rewind 3 seconds (3000 ms).
          */
         rew: function () {
-        	webapis.avplay.jumpBackward('3000');
+        	webapis.avplay.jumpBackward(3000);
         },
         /**
          * Set flag to play UHD content.
