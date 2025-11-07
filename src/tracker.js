@@ -188,13 +188,6 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
         }
         break;
 
-      case 'BUFFERING':
-        // Player is buffering
-        if (previousState === 'PLAYING') {
-          this.sendBufferStart();
-        }
-        break;
-
       case 'NONE':
         // Player is stopped/reset
         if (previousState && previousState !== 'NONE' && previousState !== 'IDLE') {
