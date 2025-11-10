@@ -51,6 +51,10 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
     return this.player.getCurrentTime() * 1000; // in milliseconds
   }
 
+  getDuration() {
+    return this.player.getDuration();
+  }
+
   registerListeners() {
     nrvideo.Log.debugCommonVideoEvents(this.player);
     this.onBufferingStart = this.onBufferingStart.bind(this);
