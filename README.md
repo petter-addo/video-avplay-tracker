@@ -2,7 +2,7 @@
 
 # New Relic AVPlay Tracker Agent
 
-The New Relic AVPlay Tracker enhances your media applications by tracking video events, playback errors, and other activities, providing comprehensive insights into performance and user interactions.
+The New Relic AVPlay Tracker enhances your Samsung Tizen smart TV media applications by tracking video events, playback errors, and other activities, providing comprehensive insights into performance and user interactions.
 
 - The AVPlay tracker is available as a ready-to-use JavaScript snippet for easy copy-paste integration.
 - New Relic AVPlay tracker auto-detects events emitted by AVPlay Player.
@@ -35,18 +35,18 @@ To integrate New Relic Tracker Agent into your web application effectively, you'
 To make the tracker available to your application, install via [NPM](https://docs.npmjs.com/cli/v8/commands/npm-install) or [Yarn](https://classic.yarnpkg.com/lang/en/docs/cli/install/).
 
 ```shell
-$ npm install @newrelic/video-AVPlay
+$ npm install @newrelic/video-avplay
 ```
 
 ```shell
-$ yarn add @newrelic/video-AVPlay
+$ yarn add @newrelic/video-avplay
 ```
 
 ## Instantiating the AVPlay Tracker
 
 ```javascript
 //Add import statement
-import AVPlayTracker from "@newrelic/video-AVPlay";
+import AVPlayTracker from "@newrelic/video-avplay";
 // Add a AVPlayTracker
 const tracker = new AVPlayTracker(player);
 
