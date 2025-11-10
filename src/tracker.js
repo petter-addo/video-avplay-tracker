@@ -13,6 +13,10 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
     this.previousState = null;
     this.isMonitoring = false;
     this.monitorInterval = options?.monitorInterval || 500; // Default 500ms
+
+    this.originalSeekToSuccessCallback = null;
+    this.originalJumpForwardSuccessCallback = null;
+    this.originalJumpBackwardSuccessCallback = null;
   }
 
   getTrackerName() {
@@ -72,6 +76,16 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
       onsubtitlechange: this.onSubtitleChange,
 
     }
+    
+    this.originalSeekTo = this.player.seekTo;
+    this.player.seekTo = this.seekTo.bind(this);
+
+    this.originalJumpForward = this.player.jumpForward;
+    this.player.jumpForward = this.jumpForward.bind(this);
+
+    this.originalJumpBackward = this.player.jumpBackward;
+    this.player.jumpBackward = this.jumpBackward.bind(this);
+
     this.player.setListener(listeners);
     
     // Start state monitoring since AVPlayer doesn't have proper callback events
@@ -83,9 +97,81 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
     this.stopStateMonitor();
   }
 
+  seekTo(milliseconds, successCallback = null, errorCallback = null) {
+    const args = [milliseconds];
+
+    const hasErrorCallback = typeof errorCallback === 'function';
+
+    this.originalSeekToSuccessCallback = successCallback || null;
+    args.push(this.seekToSuccessCallback.bind(this));
+
+    if (hasErrorCallback) {
+      args.push(errorCallback);
+    }
+    this.originalSeekTo(...args);
+    console.log('onSeekStart');
+    this.sendSeekStart();
+  }
+
+  seekToSuccessCallback() {
+    console.log('onSeekEnd'); 
+    if (this.originalSeekToSuccessCallback) {
+      this.originalSeekToSuccessCallback();
+    }
+    this.sendSeekEnd();
+  }
+
+  jumpForward(milliseconds, successCallback = null, errorCallback = null) {
+    const args = [milliseconds];
+
+    const hasErrorCallback = typeof errorCallback === 'function';
+
+    this.originalJumpForwardSuccessCallback = successCallback || null;
+    args.push(this.jumpForwardSuccessCallback.bind(this));
+
+    if (hasErrorCallback) {
+      args.push(errorCallback);
+    }
+    this.originalJumpForward(...args);
+    console.log('onSeekStart');
+    this.sendSeekStart();
+  }
+
+  jumpForwardSuccessCallback() {
+    console.log('onSeekEnd'); 
+    if (this.originalJumpForwardSuccessCallback) {
+      this.originalJumpForwardSuccessCallback();
+    }
+    this.sendSeekEnd();
+  }
+
+  jumpBackward(milliseconds, successCallback = null, errorCallback = null) {
+    const args = [milliseconds];
+
+    const hasErrorCallback = typeof errorCallback === 'function';
+
+    this.originalJumpBackwardSuccessCallback = successCallback || null;
+    args.push(this.jumpBackwardSuccessCallback.bind(this));
+
+    if (hasErrorCallback) {
+      args.push(errorCallback);
+    }
+    this.originalJumpBackward(...args);
+    console.log('onSeekStart');
+    this.sendSeekStart();
+  }
+
+  jumpBackwardSuccessCallback() {
+    console.log('onSeekEnd'); 
+    if (this.originalJumpBackwardSuccessCallback) {
+      this.originalJumpBackwardSuccessCallback();
+    }
+    this.sendSeekEnd();
+  }
+    
   onBufferingStart() {
     console.log('onBufferingStart');
-    // this.sendDownload({state: "loadstart"});
+    this.sendBufferStart();
   }
 
   onBufferingProgress(percent) {
@@ -94,6 +180,7 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
   }
 
   onBufferingComplete() {
+    console.log('onBufferingComplete');
     this.sendDownload();
     this.sendRequest();
   }

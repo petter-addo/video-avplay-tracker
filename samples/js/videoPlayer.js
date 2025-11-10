@@ -49,32 +49,6 @@ function VideoPlayer(config) {
          * @param {String} url - content url, if there is no value then take url from config
          */
     	open: function(url){
-    		/* Create listener object. */
-            var listener = {
-                onbufferingstart: function () {
-//                    log("Buffering start.");
-                },
-                onbufferingprogress: function (percent) {
-//                    log("Buffering progress data : " + percent);
-                },
-                onbufferingcomplete: function () {
-//                    log("Buffering complete.");
-                },
-                oncurrentplaytime: function (currentTime) {
-//                    log("Current playtime: " + currentTime);
-                },
-                onevent: function (eventType, eventData) {
-                    log("event type: " + eventType + ", data: " + eventData);
-                },
-                onstreamcompleted: function () {
-                    log("Stream Completed");
-                    this.stop();
-                }.bind(this),
-                onerror: function (eventType) {
-                    log("event type error : " + eventType);
-                }
-            };
-
             if (!url) {
                 url = config.url;
             }
@@ -87,8 +61,11 @@ function VideoPlayer(config) {
                     playerCoords.width,
                     playerCoords.height
                 );
-                webapis.avplay.setListener(listener);
-                webapis.avplay.prepareAsync();
+                webapis.avplay.setBufferingParam('PLAYER_BUFFER_FOR_PLAY', 'PLAYER_BUFFER_SIZE_IN_SECOND', 5);
+                webapis.avplay.setBufferingParam('PLAYER_BUFFER_FOR_RESUME', 'PLAYER_BUFFER_SIZE_IN_SECOND', 10);
+                webapis.avplay.prepareAsync(() => {
+                	webapis.avplay.play();
+                });
             } catch (e) {
                 log(e);
             }
@@ -98,11 +75,16 @@ function VideoPlayer(config) {
             //set 4k
             if (isUhd) {
                 this.set4K();
-            }
-            if (webapis.avplay.getState() === 'IDLE' || webapis.avplay.getState() === 'READY') {
-                webapis.avplay.play();
-            } else if(webapis.avplay.getState() === 'PAUSED'){
+            }   
+            console.log('onplay');
+            const state = webapis.avplay.getState();
+            console.log(`getState ${state}`);
+            if (state === 'PLAYING' || state === 'READY' || state === 'PAUSED') {
             	webapis.avplay.play();
+            } else if (state === 'IDLE' || state === 'NONE') {
+                webapis.avplay.prepareAsync(() => {
+                    webapis.avplay.play();
+                });
             }
         },
        
@@ -110,7 +92,11 @@ function VideoPlayer(config) {
          * Function to stop current playback.
          */
         stop: function () {
-        	webapis.avplay.stop();
+            const state = webapis.avplay.getState();
+            console.log(`getState ${state}`);
+            if (state === 'NONE' || state === 'IDLE' || state === 'READY' || state === 'PLAYING' || state === 'PAUSED') {
+            	webapis.avplay.stop();
+            }
             //switch back from fullscreen to window if stream finished playing
             if (isFullscreen === true) {
                 this.toggleFullscreen();
@@ -122,25 +108,46 @@ function VideoPlayer(config) {
          * Function to pause/resume playback.
          * @param {String} url - content url, if there is no value then take url from config
          */
-        pause: function (url) {
-            if (!url) {
-                url = config.url;
-            }
-            console.log('pause');
-            webapis.avplay.pause();
-            console.log('onpause end');
+        pause: function () {
+        	try {
+                const state = webapis.avplay.getState();
+                console.log(`pause State ${state}`);
+                if (state === 'PLAYING' || state === 'PAUSED') {
+                    webapis.avplay.pause();
+                }
+        	} catch (e) {
+        		console.log(e);
+        	}
+        	console.log('onpause end');
         },
         /**
          * Jump forward 3 seconds (3000 ms).
          */
         ff: function () {
-        	webapis.avplay.jumpForward(3000);
+            try {
+                const state = webapis.avplay.getState();
+                console.log(`ff State ${state}`);
+                if (state === 'READY' || state === 'PLAYING' || state === 'PAUSED') {
+                    webapis.avplay.jumpForward(3000);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+            
         },
         /**
          * Rewind 3 seconds (3000 ms).
          */
         rew: function () {
-        	webapis.avplay.jumpBackward(3000);
+            try {
+                const state = webapis.avplay.getState();
+                console.log(`rew State ${state}`);
+                if (state === 'READY' || state === 'PLAYING' || state === 'PAUSED') {
+                    webapis.avplay.jumpBackward(3000);
+                }
+            } catch (e) {
+                console.log(e);
+            }
         },
         /**
          * Set flag to play UHD content.
