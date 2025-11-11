@@ -33,11 +33,23 @@ $ npm run build
 Load **scripts** inside `dist` folder into your page.
 
 ```html
-<script src="../dist/newrelic-video-avplay.min.js"></script>
+<script src="../dist/umd/newrelic-video-avplay.min.js"></script>
 ```
 
 ```javascript
-nrvideo.Core.addTracker(new nrvideo.AVPlayTracker(player));
+const options = {
+    info: {
+        beacon: '',
+        licenseKey: '',
+        applicationID: '',
+        },
+        customData: {
+            environment: '',
+            platform: 'Tizen',
+            deviceModel: 'Samsung Smart TV'
+        },
+    }
+nrvideo.Core.addTracker(new nrvideo.AVPlayTracker(player, options));
 ```
 
 ## Release
