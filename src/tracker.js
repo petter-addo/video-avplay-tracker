@@ -93,7 +93,6 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
     this.player.setListener(listeners);
     
     // Start state monitoring since AVPlayer doesn't have proper callback events
-    console.log('startStateMonitor');
     this.startStateMonitor();
   }
 
@@ -113,12 +112,10 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
       args.push(errorCallback);
     }
     this.originalSeekTo(...args);
-    console.log('onSeekStart');
     this.sendSeekStart();
   }
 
   seekToSuccessCallback() {
-    console.log('onSeekEnd'); 
     if (this.originalSeekToSuccessCallback) {
       this.originalSeekToSuccessCallback();
     }
@@ -137,12 +134,10 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
       args.push(errorCallback);
     }
     this.originalJumpForward(...args);
-    console.log('onSeekStart');
     this.sendSeekStart();
   }
 
   jumpForwardSuccessCallback() {
-    console.log('onSeekEnd'); 
     if (this.originalJumpForwardSuccessCallback) {
       this.originalJumpForwardSuccessCallback();
     }
@@ -161,12 +156,10 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
       args.push(errorCallback);
     }
     this.originalJumpBackward(...args);
-    console.log('onSeekStart');
     this.sendSeekStart();
   }
 
   jumpBackwardSuccessCallback() {
-    console.log('onSeekEnd'); 
     if (this.originalJumpBackwardSuccessCallback) {
       this.originalJumpBackwardSuccessCallback();
     }
@@ -174,17 +167,13 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
   }
     
   onBufferingStart() {
-    console.log('onBufferingStart');
     this.sendBufferStart();
   }
 
   onBufferingProgress(percent) {
-    // console.log('onBufferingProgress', percent);
-    // this.sendDownload({ state: 'progress' });
   }
 
   onBufferingComplete() {
-    console.log('onBufferingComplete');
     this.sendDownload();
     this.sendRequest();
   }
@@ -221,7 +210,6 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
     if (!this.player || !this.player.getState) {
       return;
     }
-
     try {
       const currentState = this.player.getState();
       
@@ -231,7 +219,6 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
         this.previousState = currentState;
       }
     } catch (error) {
-      console.error('Error monitoring player state:', error);
     }
   }
 
@@ -266,7 +253,6 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
           this.sendStart();
         } else if (previousState === 'READY' || previousState === IDLE || previousState === null) {
           // Started playing from any other state
-          console.log(`sendStart`);
           this.sendStart();
         }
         break;
@@ -274,7 +260,6 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
       case 'PAUSED':
         // Player is paused
         if (previousState === 'PLAYING') {
-          console.log(`sendPause `);
           this.sendPause();
         }
         break;

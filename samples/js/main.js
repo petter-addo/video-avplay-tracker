@@ -41,7 +41,6 @@
             '2',
             '3'
         ];
-        console.log('registerKeys')
         usedKeys.forEach(
             function (keyName) {
                 tizen.tvinputdevice.registerKey(keyName);
@@ -122,7 +121,7 @@
         document.querySelector('.video-controls .ff').addEventListener(
             'click',
             function() {
-            	player.ff()
+            	player.ff();
             }
         );
         document.querySelector('.video-controls .rew').addEventListener(
@@ -192,23 +191,18 @@
          * @property {HTLM Div Element} info         - place to display stream info
          */
         var config = {
-            // url: 'http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest',
-            url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+            url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
             player: document.getElementById('av-player'),
             controls: document.querySelector('.video-controls'),
             info: document.getElementById('info'),
             logger: log, //Function used for logging
-
-            /*Smooth Streaming examples*/
-            //			url:
-            // 'http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest',
-            // url: 'http://playready.directtaps.net/smoothstreaming/TTLSS720VC1/To_The_Limit_720.ism/Manifest'
             options: {
                 info: {
                     beacon: '',
                     licenseKey: '',
                     applicationID: '',
                   },
+
                   customData: {
                     environment: 'development',
                     platform: 'Tizen',
@@ -217,7 +211,7 @@
                 title: 'Big Buck Bunny',
                 id: 'bbb-001',
                 isLive: false
-              }
+            }
         };
 
 
@@ -240,6 +234,5 @@
                 log("An error occurred " + error.message);
             }
         );
-
-    }
+    };
 }());
