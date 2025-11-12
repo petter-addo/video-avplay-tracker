@@ -17,6 +17,8 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
     this.originalSeekToSuccessCallback = null;
     this.originalJumpForwardSuccessCallback = null;
     this.originalJumpBackwardSuccessCallback = null;
+
+    this.contentSrc = null;
   }
 
   getTrackerName() {
@@ -55,6 +57,63 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
     return this.player.getDuration();
   }
 
+  getStreamInfo() {
+    const currentState = this.player.getState();
+    let streamInfo = {
+      renditionHeight: null,
+      renditionWidth: null,
+      language: null,
+    }
+    if (currentState === "READY" || currentState === "PLAYING" || currentState === "PAUSED") {
+      var infos = webapis.avplay.getCurrentStreamInfo();
+        infos.forEach(function(info) {
+          if (info.type === "VIDEO") {
+            try {
+              var json = JSON.parse(info.extra_info);
+              streamInfo.renditionWidth = json.Width;
+              streamInfo.renditionHeight = json.Height;
+            } catch(e) {
+              console.warn("Could not parse extra_info", info.extra_info);
+            }
+          } else if (info.type === "AUDIO") {
+            try {
+              const extra = JSON.parse(info.extra_info);
+              streamInfo.language = extra.language;
+            } catch (e) {
+              console.warn("Could not parse extra_info", info.extra_info);
+            }
+          }
+        });
+    }
+    return streamInfo;
+  }
+  getRenditionHeight() {
+    const streamInfo = this.getStreamInfo();
+    return streamInfo.renditionHeight;
+  }
+
+  getRenditionWidth() {
+    const streamInfo = this.getStreamInfo();
+    return streamInfo.renditionWidth;
+  }
+
+  getSrc() {
+    return this.contentSrc;
+  }
+
+  getLanguage() {
+    const streamInfo = this.getStreamInfo();
+    return streamInfo.language;
+  }
+
+  getBitRate() {
+    const currentState = this.player.getState();
+    if (currentState === "READY" || currentState === "PLAYING" || currentState === "PAUSED") {
+      return this.player.getStreamingProperty("CURRENT_BANDWIDTH");
+    }
+    return null;
+  }
+
   registerListeners() {
     nrvideo.Log.debugCommonVideoEvents(this.player);
     this.onBufferingStart = this.onBufferingStart.bind(this);
@@ -90,6 +149,9 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
     this.originalJumpBackward = this.player.jumpBackward;
     this.player.jumpBackward = this.jumpBackward.bind(this);
 
+    this.originalOpen = this.player.open;
+    this.player.open = this.open.bind(this);
+
     this.player.setListener(listeners);
     
     // Start state monitoring since AVPlayer doesn't have proper callback events
@@ -98,6 +160,11 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
 
   unregisterListeners() {
     this.stopStateMonitor();
+  }
+
+  open(url) {
+    this.contentSrc = url;
+    this.originalOpen(url);
   }
 
   seekTo(milliseconds, successCallback = null, errorCallback = null) {
@@ -189,11 +256,11 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
   }
 
   onError(eventType) {
-    this.sendError({ error: eventType });
+    this.sendError({ errorCode: eventType });
   }
 
   onErrorMsg(eventType, errorMessage) {
-    this.sendError({ error: eventType, errorMessage });
+    this.sendError({ errorCode: eventType, errorMessage });
   }
 
   onDrmEvent(type, data) {
@@ -250,8 +317,7 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
           // Resuming from pause
           this.sendBufferEnd();
           this.sendResume();
-          this.sendStart();
-        } else if (previousState === 'READY' || previousState === IDLE || previousState === null) {
+        } else if (previousState === 'READY' || previousState === 'IDLE' || previousState === null) {
           // Started playing from any other state
           this.sendStart();
         }

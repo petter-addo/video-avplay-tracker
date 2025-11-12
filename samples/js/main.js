@@ -202,16 +202,7 @@
                     licenseKey: '',
                     applicationID: '',
                   },
-
-                  customData: {
-                    environment: 'development',
-                    platform: 'Tizen',
-                    deviceModel: 'Samsung Smart TV'
-                  },
-                title: 'Big Buck Bunny',
-                id: 'bbb-001',
-                isLive: false
-            }
+              }
         };
 
 
@@ -224,11 +215,11 @@
 
                 // initialize player - loaded from videoPlayer.js
                 const avplay = webapis.avplay;
+                tracker = new AVPlayTracker(avplay, config.options);
                 log("avplay ", avplay);
                 player = new VideoPlayer(config);
                 player.open(config.url);
-                registerMouseEvents();
-                tracker = new AVPlayTracker(avplay, config.options);
+                registerMouseEvents();                
             },
             function(error) {
                 log("An error occurred " + error.message);
