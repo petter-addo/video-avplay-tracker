@@ -1,8 +1,8 @@
-[![Community Project header](https://github.com/newrelic/opensource-website/raw/master/src/images/categories/Community_Project.png)](https://opensource.newrelic.com/oss-category/#community-project)
+[![Experimental Project header](https://github.com/newrelic/opensource-website/raw/master/src/images/categories/Experimental.png)](https://opensource.newrelic.com/oss-category/oss-category/#experimental)
 
 # New Relic AVPlay Tracker Agent
 
-The New Relic AVPlay Tracker enhances your media applications by tracking video events, playback errors, and other activities, providing comprehensive insights into performance and user interactions.
+The New Relic AVPlay Tracker enhances your Samsung Tizen smart TV media applications by tracking video events, playback errors, and other activities, providing comprehensive insights into performance and user interactions.
 
 - The AVPlay tracker is available as a ready-to-use JavaScript snippet for easy copy-paste integration.
 - New Relic AVPlay tracker auto-detects events emitted by AVPlay Player.
@@ -35,42 +35,52 @@ To integrate New Relic Tracker Agent into your web application effectively, you'
 To make the tracker available to your application, install via [NPM](https://docs.npmjs.com/cli/v8/commands/npm-install) or [Yarn](https://classic.yarnpkg.com/lang/en/docs/cli/install/).
 
 ```shell
-$ npm install @newrelic/video-AVPlay
+$ npm install @newrelic/video-avplay
 ```
 
 ```shell
-$ yarn add @newrelic/video-AVPlay
+$ yarn add @newrelic/video-avplay
 ```
 
 ## Instantiating the AVPlay Tracker
 
 ```javascript
 //Add import statement
-import AVPlayTracker from "@newrelic/video-AVPlay";
-// Add a AVPlayTracker
-const tracker = new AVPlayTracker(player);
-
-//For setting custom attributes const tracker
-const tracker = new AVPlayTracker(player, {
-  customData: {
-    contentTitle: 'Override Existing Title',
-    customPlayerName: 'myGreatPlayer',
-    customPlayerVersion: '9.4.2',
+import AVPlayTracker from "@newrelic/video-avplay";
+const options = {
+  info: {
+      beacon: '',
+      licenseKey: '',
+      applicationID: '',
   },
-});
+  customData: {
+    environment: 'development',
+    platform: 'Tizen',
+    deviceModel: 'Samsung Smart TV'
+  },
+  title: 'Big Buck Bunny',
+  monitorInterval: 500, // optional polling interval in milliseconds
+};
+
+const tracker = new AVPlayTracker(player, options);
 
 // For setting userId
 tracker.setUserId('userId');
 
+// Call player.open only after the tracker is created so the tracker
+// can wrap the method and capture the content source.
+player.open('https://example.com/video.mpd');
+
 // For Sending custom Action with Attributes
-
-const tracker = new AVPlayTracker(player);
-
 tracker.sendCustom('CUSTOM_ACTION', 'state time', {
   test1: 'value1',
   test2: 'value2',
 });
 ```
+
+> **Important:** The `monitorInterval` option controls how frequently (in milliseconds) `AVPlayTracker` polls the player's state. If you do not specify a value, it defaults to `500` ms.
+
+> **Note:** The tracker overrides `player`'s some functions to capture the media source URI and other resources. Always instantiate `AVPlayTracker` before calling `player.open`.
 
 ## Data Model
 
