@@ -117,27 +117,16 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
   registerListeners() {
     nrvideo.Log.debugCommonVideoEvents(this.player);
     this.onBufferingStart = this.onBufferingStart.bind(this);
-    this.onBufferingProgress = this.onBufferingProgress.bind(this);
     this.onBufferingComplete = this.onBufferingComplete.bind(this);
-    this.onCurrentPlaytime = this.onCurrentPlaytime.bind(this);
     this.onStreamCompleted = this.onStreamCompleted.bind(this);
-    this.onEvent = this.onEvent.bind(this);
     this.onError = this.onError.bind(this);
     this.onErrorMsg = this.onErrorMsg.bind(this);
-    this.onDrmEvent = this.onDrmEvent.bind(this);
-    this.onSubtitleChange = this.onSubtitleChange.bind(this);
     const listeners = {
       onbufferingstart: this.onBufferingStart,
-      onbufferingprogress: this.onBufferingProgress,
       onbufferingcomplete: this.onBufferingComplete,
-      oncurrentplaytime: this.onCurrentPlaytime,
       onstreamcompleted: this.onStreamCompleted,
-      onevent: this.onEvent,
       onerror: this.onError,
       onerrormsg: this.onErrorMsg,
-      ondrmevent: this.onDrmEvent,
-      onsubtitlechange: this.onSubtitleChange,
-
     }
     
     this.originalSeekTo = this.player.seekTo;
@@ -236,10 +225,6 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
   onBufferingStart() {
     this.sendBufferStart();
   }
-
-  onBufferingProgress(percent) {
-  }
-
   onBufferingComplete() {
     this.sendDownload();
     this.sendRequest();
@@ -247,12 +232,6 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
 
   onStreamCompleted() {
     this.sendEnd();
-  }
-
-  onCurrentPlaytime(currentTime) {
-  }
-
-  onEvent(eventType, eventData) {
   }
 
   onError(eventType) {
@@ -263,11 +242,6 @@ export default class AVPlayTracker extends nrvideo.VideoTracker {
     this.sendError({ errorCode: eventType, errorMessage });
   }
 
-  onDrmEvent(type, data) {
-  }
-
-  onSubtitleChange() {
-  }
 
   /**
    * State monitor function to monitor player's state since AVPlayer doesn't have proper callback events.
